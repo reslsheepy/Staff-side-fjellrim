@@ -20,7 +20,7 @@
             border-radius: 8px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             width: 80%;
-            max-width: 600px;
+            max-width: 800px;
         }
         table {
             width: 100%;
@@ -44,6 +44,9 @@
             background-color: #007bff;
             color: white;
         }
+        .delete {
+            background-color: #dc3545;
+        }
     </style>
 </head>
 <body>
@@ -56,12 +59,13 @@
                     <th>Brukernavn</th>
                     <th>Årsak</th>
                     <th>Dato</th>
+                    <th>Handling</th>
                 </tr>
             </thead>
             <tbody id="ban-list">
-                <!-- Ban-data blir lagt inn her -->
             </tbody>
         </table>
+        <button onclick="addBan()">Legg til Ban</button>
         <h3>Kontaktforespørsler</h3>
         <table>
             <thead>
@@ -72,45 +76,81 @@
                 </tr>
             </thead>
             <tbody id="case-list">
-                <!-- Saksnummer blir lagt inn her -->
             </tbody>
         </table>
     </div>
     <script>
-        const banList = [
-            {username: "Spiller1", reason: "Juksing", date: "2024-02-02"},
-            {username: "Spiller2", reason: "Trakassering", date: "2024-02-01"}
-        ];
-        const caseList = [
-            {caseNumber: 1, email: "bruker1@example.com", claimed: false},
-            {caseNumber: 2, email: "bruker2@example.com", claimed: false}
-        ];
+        let banList = [];
+        let caseList = [];
+        let caseCounter = 1;
+
         function loadBanList() {
             const banTable = document.getElementById("ban-list");
-            banTable.innerHTML = banList.map(ban => `<tr><td>${ban.username}</td><td>${ban.reason}</td><td>${ban.date}</td></tr>`).join('');
+            banTable.innerHTML = banList.map((ban, index) => `
+                <tr>
+                    <td>${ban.username}</td>
+                    <td>${ban.reason}</td>
+                    <td>${ban.date}</td>
+                    <td><button class="delete" onclick="removeBan(${index})">Slett</button></td>
+                </tr>
+            `).join('');
         }
+        
         function loadCaseList() {
             const caseTable = document.getElementById("case-list");
-            caseTable.innerHTML = caseList.map(caseItem => `
+            caseTable.innerHTML = caseList.map((caseItem, index) => `
                 <tr>
                     <td>${caseItem.caseNumber}</td>
                     <td>${caseItem.email}</td>
                     <td>
-                        ${caseItem.claimed ? "Tatt" : `<button onclick="claimCase(${caseItem.caseNumber})">Claim</button>`}
+                        ${caseItem.claimed ? "Tatt" : `<button onclick="claimCase(${index})">Claim</button>`}
+                        <button class="delete" onclick="removeCase(${index})">Slett</button>
                     </td>
                 </tr>
             `).join('');
         }
-        function claimCase(caseNumber) {
-            const caseItem = caseList.find(c => c.caseNumber === caseNumber);
-            if (caseItem) {
-                caseItem.claimed = true;
-                loadCaseList();
+        
+        function claimCase(index) {
+            caseList[index].claimed = true;
+            loadCaseList();
+        }
+
+        function removeCase(index) {
+            caseList.splice(index, 1);
+            loadCaseList();
+        }
+
+        function removeBan(index) {
+            banList.splice(index, 1);
+            loadBanList();
+        }
+
+        function addBan() {
+            let username = prompt("Brukernavn:");
+            let reason = prompt("Årsak:");
+            let date = new Date().toISOString().split('T')[0];
+            if (username && reason) {
+                banList.push({username, reason, date});
+                loadBanList();
             }
         }
+
+        function fetchEmails() {
+            // Simulert e-posthenting (dette må kobles til en faktisk e-postserver i backend)
+            let newEmails = [
+                {email: "bruker1@fjellrim.eu"},
+                {email: "bruker2@fjellrim.eu"}
+            ];
+            newEmails.forEach(email => {
+                caseList.push({caseNumber: caseCounter++, email: email.email, claimed: false});
+            });
+            loadCaseList();
+        }
+
         window.onload = function() {
             loadBanList();
             loadCaseList();
+            fetchEmails();
         }
     </script>
 </body>
