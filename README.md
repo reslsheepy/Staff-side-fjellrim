@@ -13,6 +13,7 @@
             justify-content: center;
             height: 100vh;
             background-color: #f4f4f4;
+            visibility: hidden;
         }
         .container {
             background: white;
@@ -66,23 +67,37 @@
             </tbody>
         </table>
         <button onclick="addBan()">Legg til Ban</button>
-        <h3>Kontaktforespørsler</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Saksnummer</th>
-                    <th>E-post</th>
-                    <th>Handling</th>
-                </tr>
-            </thead>
-            <tbody id="case-list">
-            </tbody>
-        </table>
     </div>
     <script>
-        let banList = [];
-        let caseList = [];
-        let caseCounter = 1;
+        const validCredentials = {
+            "admin": "pass123",
+            "moderator1": "modpass1",
+            "moderator2": "modpass2",
+            "moderator3": "modpass3",
+            "moderator4": "modpass4"
+        };
+
+        function checkLogin() {
+            const username = prompt("Brukernavn:");
+            const password = prompt("Passord:");
+            if (validCredentials[username] && validCredentials[username] === password) {
+                localStorage.setItem("loggedIn", "true");
+                document.body.style.visibility = "visible";
+            } else {
+                alert("Feil brukernavn eller passord!");
+                checkLogin();
+            }
+        }
+
+        window.onload = function() {
+            if (localStorage.getItem("loggedIn") !== "true") {
+                checkLogin();
+            } else {
+                document.body.style.visibility = "visible";
+            }
+        };
+
+        let banList = JSON.parse(localStorage.getItem("banList")) || [];
 
         function loadBanList() {
             const banTable = document.getElementById("ban-list");
@@ -95,33 +110,10 @@
                 </tr>
             `).join('');
         }
-        
-        function loadCaseList() {
-            const caseTable = document.getElementById("case-list");
-            caseTable.innerHTML = caseList.map((caseItem, index) => `
-                <tr>
-                    <td>${caseItem.caseNumber}</td>
-                    <td>${caseItem.email}</td>
-                    <td>
-                        ${caseItem.claimed ? "Tatt" : `<button onclick="claimCase(${index})">Claim</button>`}
-                        <button class="delete" onclick="removeCase(${index})">Slett</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-        
-        function claimCase(index) {
-            caseList[index].claimed = true;
-            loadCaseList();
-        }
-
-        function removeCase(index) {
-            caseList.splice(index, 1);
-            loadCaseList();
-        }
 
         function removeBan(index) {
             banList.splice(index, 1);
+            localStorage.setItem("banList", JSON.stringify(banList));
             loadBanList();
         }
 
@@ -131,27 +123,19 @@
             let date = new Date().toISOString().split('T')[0];
             if (username && reason) {
                 banList.push({username, reason, date});
+                localStorage.setItem("banList", JSON.stringify(banList));
                 loadBanList();
             }
         }
 
-        function fetchEmails() {
-            // Simulert e-posthenting (dette må kobles til en faktisk e-postserver i backend)
-            let newEmails = [
-                {email: "bruker1@fjellrim.eu"},
-                {email: "bruker2@fjellrim.eu"}
-            ];
-            newEmails.forEach(email => {
-                caseList.push({caseNumber: caseCounter++, email: email.email, claimed: false});
-            });
-            loadCaseList();
-        }
-
         window.onload = function() {
-            loadBanList();
-            loadCaseList();
-            fetchEmails();
-        }
+            if (localStorage.getItem("loggedIn") !== "true") {
+                checkLogin();
+            } else {
+                document.body.style.visibility = "visible";
+                loadBanList();
+            }
+        };
     </script>
 </body>
 </html>
