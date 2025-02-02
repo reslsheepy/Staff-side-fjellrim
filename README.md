@@ -202,17 +202,6 @@
                 document.getElementById("announcement-input").value = "";
             }
         }
-
-        window.onload = function() {
-            if (localStorage.getItem("loggedIn") !== "true") {
-                checkLogin();
-            } else {
-                document.body.style.visibility = "visible";
-                loadBanList();
-                loadAnnouncements();
-                checkAdminPrivileges();
-            }
-        };
     </script>
 </body>
 </html>
