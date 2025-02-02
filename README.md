@@ -112,9 +112,14 @@
         }
 
         function removeBan(index) {
-            banList.splice(index, 1);
-            localStorage.setItem("banList", JSON.stringify(banList));
-            loadBanList();
+            const password = prompt("Skriv inn passordet for å slette denne loggen:");
+            if (password === "tørketbanan") {
+                banList.splice(index, 1);
+                localStorage.setItem("banList", JSON.stringify(banList));
+                loadBanList();
+            } else {
+                alert("Feil passord!");
+            }
         }
 
         function addBan() {
