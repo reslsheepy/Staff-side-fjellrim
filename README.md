@@ -12,16 +12,19 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f4f4f4;
+            background-color: #e9ecef;
             visibility: hidden;
+            margin: 0;
+            padding: 0;
         }
         .container {
             background: white;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
             width: 80%;
             max-width: 800px;
+            margin-top: 30px;
         }
         table {
             width: 100%;
@@ -30,23 +33,52 @@
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 12px;
             text-align: left;
         }
         th {
-            background-color: #28a745;
+            background-color: #17a2b8;
             color: white;
         }
         button {
-            padding: 5px 10px;
+            padding: 10px 15px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             background-color: #007bff;
             color: white;
+            margin-top: 20px;
         }
         .delete {
             background-color: #dc3545;
+        }
+        .announcement-container {
+            margin-top: 40px;
+            width: 100%;
+        }
+        .announcement-box {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .announcement-input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+        }
+        .announcement-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -67,6 +99,13 @@
             </tbody>
         </table>
         <button onclick="addBan()">Legg til Ban</button>
+        
+        <div class="announcement-container">
+            <h3>Staff Announcements</h3>
+            <div class="announcement-box" id="announcement-box"></div>
+            <textarea class="announcement-input" id="announcement-input" placeholder="Skriv en melding..."></textarea>
+            <button class="announcement-button" onclick="addAnnouncement()">Legg til Announsement</button>
+        </div>
     </div>
     <script>
         const validCredentials = {
@@ -82,6 +121,7 @@
             const password = prompt("Passord:");
             if (validCredentials[username] && validCredentials[username] === password) {
                 localStorage.setItem("loggedIn", "true");
+                localStorage.setItem("loggedUser", username);
                 document.body.style.visibility = "visible";
             } else {
                 alert("Feil brukernavn eller passord!");
@@ -94,6 +134,9 @@
                 checkLogin();
             } else {
                 document.body.style.visibility = "visible";
+                loadBanList();
+                loadAnnouncements();
+                checkAdminPrivileges();
             }
         };
 
@@ -133,12 +176,41 @@
             }
         }
 
+        function checkAdminPrivileges() {
+            const loggedUser = localStorage.getItem("loggedUser");
+            if (loggedUser !== "admin") {
+                document.getElementById("announcement-input").style.display = "none";
+                document.getElementById("announcement-button").style.display = "none";
+            }
+        }
+
+        let announcements = JSON.parse(localStorage.getItem("announcements")) || [];
+
+        function loadAnnouncements() {
+            const announcementBox = document.getElementById("announcement-box");
+            announcementBox.innerHTML = announcements.map(announcement => `
+                <p>${announcement}</p>
+            `).join('');
+        }
+
+        function addAnnouncement() {
+            const announcementInput = document.getElementById("announcement-input").value;
+            if (announcementInput) {
+                announcements.push(announcementInput);
+                localStorage.setItem("announcements", JSON.stringify(announcements));
+                loadAnnouncements();
+                document.getElementById("announcement-input").value = "";
+            }
+        }
+
         window.onload = function() {
             if (localStorage.getItem("loggedIn") !== "true") {
                 checkLogin();
             } else {
                 document.body.style.visibility = "visible";
                 loadBanList();
+                loadAnnouncements();
+                checkAdminPrivileges();
             }
         };
     </script>
