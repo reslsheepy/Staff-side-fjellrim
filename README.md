@@ -70,8 +70,8 @@
     </div>
     <script>
         const validCredentials = {
-            "admin": "pass123",
-            "moderator1": "modpass1",
+            "Sheepy": "Jomis456",
+            "Jonas": "Jonas2505",
             "moderator2": "modpass2",
             "moderator3": "modpass3",
             "moderator4": "modpass4"
